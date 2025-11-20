@@ -7,7 +7,21 @@ require('dotenv').config();
 const app = express();
 const port = process.env.PORT || 3888;
 
-app.use(cors());
+const allowedOrigins = [
+    'https://laboratorio15-frontend.vercel.app/',
+    'http://localhost:5173'
+];
+
+app.use(cors({
+    origin: function (origin, callback) {
+        if (!origin || allowedOrigins.includes(origin)) {
+            callback(null, true);
+        } else {
+            callback(new Error('No permitido por CORS'));
+        }
+    }
+}));
+
 app.use(express.json());
 
 // --- Rutas ---
