@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const pool = require('./db');
+const productosRoutes = require('./routes/product.routes');
 require('dotenv').config();
 
 const app = express();
@@ -8,6 +9,9 @@ const port = process.env.PORT || 3888;
 
 app.use(cors());
 app.use(express.json());
+
+// --- Rutas ---
+app.use('/api/productos', productosRoutes);
 
 const initDB = async () => {
     try {
@@ -19,36 +23,12 @@ const initDB = async () => {
         stock INT
       );
     `);
-        console.log("Tabla 'productos' verificada/creada exitosamente");
+        console.log("Tabla 'productos' lista");
     } catch (err) {
-        console.error("Error creando tabla:", err);
+        console.error("Error DB:", err);
     }
 };
 initDB();
-
-// --- RUTAS ---
-app.get('/productos', async (req, res) => {
-    try {
-        const result = await pool.query('SELECT * FROM productos');
-        res.json(result.rows);
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-});
-
-// Crear producto 
-app.post('/productos', async (req, res) => {
-    const { nombre, precio, stock } = req.body;
-    try {
-        const result = await pool.query(
-            'INSERT INTO productos (nombre, precio, stock) VALUES ($1, $2, $3) RETURNING *',
-            [nombre, precio, stock]
-        );
-        res.json(result.rows[0]);
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-});
 
 app.listen(port, () => {
     console.log(`Servidor corriendo en puerto ${port}`);
